@@ -1,13 +1,44 @@
 ﻿// lab_C_plus_plus_4-10.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
-#include <Windows.h>
-#include "gameController.h"
-#include "gameField.h"
+#include <Windows.h> // Бібліотека для виведення символів кириці в консоль
+#include <iostream> // Стандартна бібліотека для вводу/виводу
+#include "gameController.h" // Підключення модуля, що містить в собі реалізацію структури GameController
+#include "gameField.h" // Підключення модуля, що містить в собі реалізацію структури GameField
 
-int main() 
+int main() // Головна функція програми
 {
-	SetConsoleOutputCP(1251);
-	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251); // Встановлення кодування консолі Windows-1251
+	SetConsoleCP(1251); // Встановлення кодування консолі Windows-1251
 
-	return 0;
+	GameField field; 
+	int size = 10, x = 3, y = 2, token = 4;
+
+	if (size > MaxGameFieldSize || size < MinGameFieldSize) // Якщо вказаний розмір ігрового поля не задовольняє встановлені межі
+	{
+		std::cout << "Введений розмір ігрового поля перевищує допустимий" << std::endl;
+		return 1; // Завершення програми з кодом помилки
+	}
+	field.create_board(size); // Ініціалізація ігрового поля
+	field.output_board(); // Виведення на екран ігрового поля
+
+	if (field.is_move(x, y)) // Якщо рух фішки є можливим
+	{
+		std::cout << "Фішка з координатами (" << x << "; " << y << ") є доступною для руху!" << std::endl;
+	}
+	else
+	{
+		std::cout << "Для фішки з координатами (" << x << "; " << y << ") виконання руху є неможливим!" << std::endl;
+	}
+	if (field.move_token(token)) // Якщо метод виконання ходу повернув true
+	{
+		std::cout << "Обрана фішка: " << token << std::endl;
+		std::cout << "Оновлене поле:" << std::endl;
+		field.output_board(); // Виведення оновленого ігрового поля на екран
+	}
+	else
+	{
+		std::cout << "Фішка з номером " << token << " не є доступною для руху!" << std::endl;
+	}
+	return 0; // Завершення роботи програми з кодом успіху
 }
+
