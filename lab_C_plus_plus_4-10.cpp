@@ -1,5 +1,6 @@
 ﻿// lab_C_plus_plus_4-10.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
+
 #include <Windows.h> // Бібліотека для виведення символів кириці в консоль
 #include <iostream> // Стандартна бібліотека для вводу/виводу
 #include "gameController.h" // Підключення модуля, що містить в собі реалізацію структури GameController
@@ -11,7 +12,7 @@ int main() // Головна функція програми
 	SetConsoleCP(1251); // Встановлення кодування консолі Windows-1251
 
 	GameField field; 
-	int size = 10, x = 3, y = 2, token = 4;
+	int size = 4, x = 3, y = 2, token = 4;
 
 	if (size > MaxGameFieldSize || size < MinGameFieldSize) // Якщо вказаний розмір ігрового поля не задовольняє встановлені межі
 	{
@@ -19,7 +20,7 @@ int main() // Головна функція програми
 		return 1; // Завершення програми з кодом помилки
 	}
 	field.create_board(size); // Ініціалізація ігрового поля
-	field.output_board(); // Виведення на екран ігрового поля
+	std::cout << field; // Виведення на екран ігрового поля
 
 	if (field.is_move(x, y)) // Якщо рух фішки є можливим
 	{
@@ -29,16 +30,25 @@ int main() // Головна функція програми
 	{
 		std::cout << "Для фішки з координатами (" << x << "; " << y << ") виконання руху є неможливим!" << std::endl;
 	}
-	if (field.move_token(token)) // Якщо метод виконання ходу повернув true
+	if (field >> token) // Якщо метод виконання ходу повернув true
 	{
 		std::cout << "Обрана фішка: " << token << std::endl;
 		std::cout << "Оновлене поле:" << std::endl;
-		field.output_board(); // Виведення оновленого ігрового поля на екран
+		std::cout << field; // Виведення оновленого ігрового поля на екран
 	}
 	else
 	{
 		std::cout << "Фішка з номером " << token << " не є доступною для руху!" << std::endl;
 	}
+
+	for (int i = 0; i < size; i++) // Цикл по рядкам, очищення пам'яті масивів рядків
+	{
+		delete[] field.board[i]; 
+		field.board[i] = nullptr;
+	}
+	delete[] field.board; // Очищення пам'яті основного масиву
+	field.board = nullptr;
+
 	return 0; // Завершення роботи програми з кодом успіху
 }
 
