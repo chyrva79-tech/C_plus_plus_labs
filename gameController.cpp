@@ -13,24 +13,19 @@ void GameController::start_game() // Визначення функції, що відповідає за почато
 		std::getline(std::cin, user_input); // Запис вводу користувача у рядок
 		try // Блок обробки виключень
 		{
-			size_t pos; // Оголошення змінної для зберігання позиції в рядку, де закінчується числовий символ
-			game_board.sizef = stoi(user_input, &pos); // Конвертування рядка в числовий тип
-			if (pos < user_input.length()) // Якщо у рядку наявні зайві символи
-			{
-				throw std::invalid_argument(""); // Кидається виняток
-			}
-			else if (game_board.sizef < MinGameFieldSize || game_board.sizef > MaxGameFieldSize) // Інакше якщо введений розмір не задовольняє допустимий
-			{
-				std::cout << "Введений розмір ігрового поля перевищує допустимий!" << std::endl;
-				continue; // Початок циклу з початку
-			}
-			break; // Вихід з циклу
+			game_board.sizef = input_checking(user_input);
 		}
 		catch (std::invalid_argument& e) // Виняток перехвачується
 		{
-			std::cerr << "Введено зайві символи!\nВведіть, будь ласка, ще раз.\nДеталі: " << e.what() << "\n\n";
+			std::cerr << "\nПомилку перехоплено!\nВведіть, будь ласка, ще раз.\nДеталі: " << e.what() << "\n\n";
 			continue; // Початок циклу з початку
 		}
+		if (game_board.sizef < MinGameFieldSize || game_board.sizef > MaxGameFieldSize) // Інакше якщо введений розмір не задовольняє допустимий
+		{
+			std::cout << "\nВведений розмір ігрового поля не є допустимим!\n" << std::endl;
+			continue; // Початок циклу з початку
+		}
+		break; // Вихід з циклу
 	}
 	move_count = 0; // Оновлення змінної, що підраховує кількість зроблених ходів
 	game_board.create_board(game_board.sizef); // Запуск методу ініціалізації ігрового поля
@@ -45,6 +40,29 @@ void GameController::start_game() // Визначення функції, що відповідає за почато
 	}
 	delete[] game_board.board; // Очищення пам'яті основного масиву
 	game_board.board = nullptr;
+}
+
+int GameController::input_checking(std::string user_input)
+{
+	int number;
+	size_t pos;
+	try
+	{
+		number = stoi(user_input, &pos);
+	}
+	catch (const std::out_of_range&)
+	{
+		throw std::invalid_argument("\nВведене число є завеликим!");
+	}
+	catch (const std::invalid_argument&)
+	{
+		throw std::invalid_argument("\nВведений запис не є числом!");
+	}
+	if (pos < user_input.length())
+	{
+		throw std::invalid_argument("\nУ записі наявні зайві символи!");
+	}
+	return number;
 }
 
 void GameController::game_loop() // Визначення функції, що відповідає за логіку основного ігрового циклу
@@ -81,27 +99,22 @@ void GameController::game_loop() // Визначення функції, що відповідає за логіку 
 				game_board.status = GameField::Active; // Встановлення статусу гри у активному режимі 
 				continue; // Початок циклу з початку
 			}
-			try // Блок обробки виключень
+			try
 			{
-				size_t pos; // Оголошення змінної для зберігання позиції в рядку, де закінчується числовий символ
-				token = stoi(user_input, &pos); // Конвертування рядка в числовий тип
-				if (pos < user_input.length()) // Якщо у рядку наявні зайві символи
-				{
-					throw std::invalid_argument(""); // Кидається виняток
-				}
+				token = input_checking(user_input); // Конвертування рядка в числовий тип
+				game_board >> token;
 			}
-			catch (std::invalid_argument& e) // Виняток перехвачується 
+			catch (const std::invalid_argument& e)
 			{
-				std::cout << std::endl;
-				std::cerr << "Введено зайві символи!\nВведіть, будь ласка, ще раз.\nДеталі: " << e.what() << "\n\n";
-				continue; // Початок циклу з початку
+				std::cerr << "\nПомилку перехоплено!\nВведіть, будь ласка, ще раз.\nДеталі: " << e.what() << "\nПерехід до нового ходу\n\n";
+				break;
 			}
-			if (!(game_board >> token)) // Якщо фішку не можна пересунути
+			catch (std::logic_error& e)
 			{
-				std::cout << std::endl;
-				std::cout << "Фішка з номером " << token << " не є доступною для руху!" << std::endl;
-				continue; // Початок циклу з початку
+				std::cerr << "\nПомилку перехоплено!\nДеталі: " << e.what() << "Перехід до нового ходу\n\n";
+				break;
 			}
+
 			move_count++; // Підрахунок кількості ходів
 			std::cout << "Обрана фішка: " << token << std::endl;
 			std::cout << std::endl;
